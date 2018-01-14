@@ -20,7 +20,7 @@ def analyze_tweets(tweets, just_sentiment=False):
     tweets_text = [t.replace('.', ',') for t in tweets_text]
     chunk_size = len(tweets_text) // NUM_THREADS
     threads = []
-    results = [] * NUM_THREADS
+    results = [None] * NUM_THREADS
     for i in range(NUM_THREADS):
         tweet_chunk = tweets_text[i*chunk_size:(i+1)*chunk_size]
         if i + 1 == NUM_THREADS:
