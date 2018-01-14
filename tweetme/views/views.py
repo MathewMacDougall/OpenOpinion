@@ -13,7 +13,7 @@ def analyze(request):
     q = request.GET['user_query']
 
 
-    res = tweety.search.tweets(q=q)
+    res = tweety.search.tweets(q=q,lang='en',result_type='recent',count=100)
 
     entities = []
     for s in res['statuses']:
@@ -26,3 +26,32 @@ def analyze(request):
         })
 
     return http.JsonResponse(entities, safe=False)
+
+def fakeanalyze(request):
+    q = request.GET['user_query']
+    print(q)
+    fake = [
+        {"entity": "Trump",
+         "weight": "0.7",
+         "sentiment": "-0.7"
+        },
+        {"entity": "cats",
+         "weight": "0.3",
+         "sentiment": "0.5"
+        },
+        {"entity": "gucci",
+         "weight": "0.05",
+         "sentiment": "0.1"
+        },
+        {"entity": "Justin Trudeau",
+         "weight": "0.97",
+         "sentiment": "0.99"
+        },
+        {"entity": "NWHacks",
+         "weight": "0.5",
+         "sentiment": "0.6"
+        }
+        ]
+
+    return http.JsonResponse(fake, safe=False)
+
