@@ -153,17 +153,17 @@ def analyze_many(request):
         utils.save_cache_file(keyword, total_tweet_results)
 
         for t in total_tweet_results:
-            t['entitity'] = keyword
+            t['entity'] = keyword
 
         tweet_metas += total_tweet_results
 
     for meta in tweet_metas:
-        for entity in meta['entities']:
-            if entity.lower() in SKIP_ENTITIES: continue
-            if entity not in weights:
-                weights[entity], agg_sent[entity] = 0, 0
-            weights[entity] += 1
-            agg_sent[entity] += meta['sentiment']
+        entity = meta['entity']
+        if entity.lower() in SKIP_ENTITIES: continue
+        if entity not in weights:
+            weights[entity], agg_sent[entity] = 0, 0
+        weights[entity] += 1
+        agg_sent[entity] += meta['sentiment']
 
     max_weight = max([v for v in weights.values()])
     max_sent = max([abs(v) for v in agg_sent.values()])
