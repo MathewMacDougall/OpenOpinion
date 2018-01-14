@@ -8,7 +8,7 @@ import threading
 NLP_SERVICE_URL = 'http://localhost:9000/?properties={"annotators":"tokenize,ssplit,pos,lemma,ner,parse,dcoref,sentiment,depparse,natlog,openie","outputFormat":"json"}'
 CACHE_PATH = "cache/"
 CACHE_TIME = 60 * 60 # 1 hour
-NUM_THREADS = 10
+NUM_THREADS = 4
 
 def process_block(tweet_block, results, i):
     res = requests.post(NLP_SERVICE_URL, data=tweet_block)

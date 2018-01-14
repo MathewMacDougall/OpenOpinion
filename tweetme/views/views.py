@@ -5,18 +5,27 @@ import random
 import re
 from datetime import timezone, datetime
 
-CONSUMER_KEY = "ET6mcjXi8L6RxK5kH2e4zDBCa"
-CONSUMER_SECRET = "AhlnBaCBtpxmoYbH4aefITQHYDiCP8Plo0ejqOVrc4NYQiqLDk"
-ACCESS_TOKEN = "859835152507125761-M2zMka0P1zYdUbWZTdum3vnMI0IPnzO"
-ACCESS_SECRET = "2SyT2qaNGkYWZgXERiBX01lHZU3VnUgVSZWFRwVJ5p1zM"
+CONSUMER_KEY_AIDAN = "ET6mcjXi8L6RxK5kH2e4zDBCa"
+CONSUMER_SECRET_AIDAN = "AhlnBaCBtpxmoYbH4aefITQHYDiCP8Plo0ejqOVrc4NYQiqLDk"
+ACCESS_TOKEN_AIDAN = "859835152507125761-M2zMka0P1zYdUbWZTdum3vnMI0IPnzO"
+ACCESS_SECRET_AIDAN = "2SyT2qaNGkYWZgXERiBX01lHZU3VnUgVSZWFRwVJ5p1zM"
+
+CONSUMER_KEY_KAI = "78p65azjYRNIZSW4rzQmmULHz"
+CONSUMER_SECRET_KAI = "bw0kmimTkvIkWnWlW0xaMW9YODFiLuRSJhOI4lrXGYx1fPOHgg"
+ACCESS_TOKEN_KAI = "2564496134-M2zMka0P1zYdUbWZTdum3vnMI0IPnzO"
+ACCESS_SECRET_KAI = "nfvnqZdo2twVd9dHDnsz2ZibybOWY87CE2esCbdY14pb6"
 
 BATCHES_TWEETS = 2 # How many times to fetch tweets per keyword
 TOP_N = 10 # How many assicociated words to return
 COUNT = 100 # How many tweets to retrieve per query (MAX is 100)
 SMALL_COUNT = 10 # How many tweets to retrieve per query (MAX is 100)
 
-auth = twitter.OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
-tweety = twitter.Twitter(auth=auth)
+auth_aidan = twitter.OAuth(ACCESS_TOKEN_AIDAN, ACCESS_SECRET_AIDAN, CONSUMER_KEY_AIDAN, CONSUMER_SECRET_AIDAN)
+auth_kai = twitter.OAuth(ACCESS_TOKEN_KAI, ACCESS_SECRET_KAI, CONSUMER_KEY_KAI, CONSUMER_SECRET_KAI)
+tweety_aidan = twitter.Twitter(auth=auth_aidan)
+tweety_kai = twitter.Twitter(auth=auth_kai)
+global api_counter
+api_counter = 0
 
 SKIP_ENTITIES = ['rt']
 
@@ -25,6 +34,14 @@ def analyze(request):
     keyword = request.GET.get('keyword')
     type = request.GET['type']
     print("keywords are {} and type is {}".format(keyword, type))
+
+    if api_counter % 2 is 0:
+        tweety = tweety_aidan
+        #api_aidan = not api_aidan
+    else:
+        tweety = tweety_kai
+        #api_aidan = not api_aidan
+    api_counter += 1
 
     # The array where we store the results for each keyword
     agg_sent = {}
@@ -105,6 +122,12 @@ def analyze_many(request):
     keywords = request.GET.get('keywords').split(',')
     type = request.GET['type']
     print("keywords are {} and type is {}".format(keywords, type))
+
+    if api_counter % 2 is 0:
+        tweety = tweety_aidan
+    else:
+        tweety= tweety_kai
+    api_counter += 1
 
     # The array where we store the results for each keyword
     agg_sent = {}
