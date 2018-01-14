@@ -1,6 +1,11 @@
 import requests
+import os
+import json
+import time
 
 NLP_SERVICE_URL = 'http://localhost:9000/?properties={"annotators":"tokenize,ssplit,pos,lemma,ner,parse,dcoref,sentiment,depparse,natlog,openie","outputFormat":"json"}'
+CACHE_PATH = "cache/"
+CACHE_TIME = 60 * 60 # 1 hour
 
 def analyze_tweets(tweets):
     tweets = [t.replace('\.', ',') for t in tweets]
@@ -35,3 +40,23 @@ def analyze_tweets(tweets):
         tweet_metas.append({'sentiment': sent, 'entities': entities})
 
     return tweet_metas
+
+def load_cache_file(query):
+    filename = CACHE_PATH + get_cache_filename(query)
+    result = []
+    if filename:
+        with open(filename, 'r') as file:
+            result = json.load(file)
+
+        ct = time.time()
+        result = [r for r in result if r['timestamp'] - ct <= CACHE_TIME]
+    return result
+
+def save_cache_file(query, nlp_data):
+    filename = CACHE_PATH + get_cache_filename(query)
+    data = {data['id']: data for data in nlp_data}
+    with open(filename, 'w') as file:
+        json.dump(data, file)
+
+def get_cache_filename(query):
+    return query.replace(" ", "_") + ".json"

@@ -1,16 +1,17 @@
 from django import http
 from tweetme import utils
 import twitter
-import numpy as np
 import random
+import os
 
 CONSUMER_KEY = "ET6mcjXi8L6RxK5kH2e4zDBCa"
 CONSUMER_SECRET = "AhlnBaCBtpxmoYbH4aefITQHYDiCP8Plo0ejqOVrc4NYQiqLDk"
 ACCESS_TOKEN = "859835152507125761-M2zMka0P1zYdUbWZTdum3vnMI0IPnzO"
 ACCESS_SECRET = "2SyT2qaNGkYWZgXERiBX01lHZU3VnUgVSZWFRwVJ5p1zM"
 
-BATCHES_TWEETS = 2
+BATCHES_TWEETS = 1
 TOP_N = 10
+COUNT = 20
 
 auth = twitter.OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 tweety = twitter.Twitter(auth=auth)
@@ -30,27 +31,41 @@ def analyze(request):
     max_id = None
     for i in range(BATCHES_TWEETS):
         # Get the tweet data for each keyword
-        res = tweety.search.tweets(q=keyword,lang='en',result_type='recent',count=100, max_id=max_id)
-
+        res = tweety.search.tweets(q=keyword,lang='en',result_type='recent',count=COUNT, max_id=max_id)
+        #return http.JsonResponse(res, safe=False)
         # Extract the important info from the tweets
 
         for s in res['statuses']:
             # Remove emojies from the text
             text = ''.join([x for x in s['text'] if ord(x) < 256])
             tweets.append({
-                'text': text,
-                'retweet_count': s['retweet_count'],
-                'user_followers': s['user']['followers_count'],
-                'created_at': s['created_at']
+                'text': text, # The body of the tweet
+                'retweet_count': s['retweet_count'], # Retweet count
+                'user_followers': s['user']['followers_count'], # User followers
+                'created_at': s['created_at'], # Time tweet was created
+                'id': s['id'], # Unique id of tweet
+                'timestamp': time.time() # Our own timestamp of when this tweet was read
             })
         max_id = min([s['id'] for s in res['statuses']])
+
     t1 = time.time()
     print(f'Took {t1 - t0}s to fetch {BATCHES_TWEETS} batches of tweets')
 
+    # Load any cached data for this query
+    cache_metas = utils.get_cache_filename(keyword)
+
+    # Remove any scraped tweets that are already in the cache
+    tweets = [t for t in tweets if not cache_metas.has_key(tweets['id]'])]
 
     tweet_metas = utils.analyze_tweets([t['text'] for t in tweets])
     print(f'Took {time.time() - t1}s to analyze tweets')
-    for meta in tweet_metas:
+
+    # Combine cached results and new results
+    tweet_results = {}
+    tweet_results.update(cache_metas)
+    tweet_results.update(tweet_metas)
+
+    for meta in tweet_results:
         for entity in meta['entities']:
             if entity == 'RT': continue
             if entity not in weights:
@@ -67,6 +82,10 @@ def analyze(request):
 
     results = [{'entity': e, 'weight': weights[e], 'sentiment': agg_sent[e]} for e in weights]
     results.sort(key=lambda r: r['weight'], reverse=True)
+
+    # Save results in cache
+    utils.save_cache_file(keyword, results)
+
     return http.JsonResponse(results[:TOP_N], safe=False)
 
 def fakeanalyze(request):
