@@ -96,7 +96,7 @@ def analyze(request):
 
 def analyze_many(request):
     print("\n\n")
-    keywords = request.GET.get('keywords')
+    keywords = request.GET.get('keywords').split(',')
     type = request.GET['type']
     print("keywords are {} and type is {}".format(keywords, type))
 
@@ -109,6 +109,7 @@ def analyze_many(request):
     t0 = time.time()
     max_id = None
     for keyword in keywords:
+	print(f'Current keyword is {keyword}')
         # Get the tweet data for each keyword
         tweets_for_kw = []
         res = tweety.search.tweets(q=keyword,lang='en',result_type='recent',count=SMALL_COUNT, max_id=max_id)
