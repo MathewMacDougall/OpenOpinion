@@ -175,6 +175,8 @@ def analyze_many(request):
         # if entity not in weights:
         #     weights[entity], agg_sent[entity] = 0, 0
         # weights[entity] += 1
+        if entity not in agg_sent:
+            agg_sent[entity] = 0
         agg_sent[entity] += meta['sentiment']
 
     max_weight = max([v for v in weights.values()])
