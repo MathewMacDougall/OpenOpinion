@@ -21,7 +21,8 @@ def analyze(request):
         entities.append({
             'text': text,
             'retweet_count': s['retweet_count'],
-            'user_followers': s['user']['followers_count']
+            'user_followers': s['user']['followers_count'],
+	    'created_at': s['created_at']
         })
 
     return http.JsonResponse(entities, safe=False)
