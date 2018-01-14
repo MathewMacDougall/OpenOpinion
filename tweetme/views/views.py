@@ -143,13 +143,13 @@ def analyze_many(request):
         tweets_for_kw = [t for t in tweets_for_kw if t['id'] not in cache_tweet_ids]
 
         t2 = time.time()
-        tweet_metas = utils.analyze_tweets(tweets_for_kw)
+        tweet_metas_for_kw = utils.analyze_tweets(tweets_for_kw)
         t3 = time.time()
         print(f'Loaded {len(cache_metas)} results from cache')
-        print(f'Took {t3 - t2}s to analyze {len(tweet_metas)} new tweets')
+        print(f'Took {t3 - t2}s to analyze {len(tweet_metas_for_kw)} new tweets')
 
         # Combine cached results and new results. Store this new data in the cache again
-        total_tweet_results = cache_metas + tweet_metas
+        total_tweet_results = cache_metas + tweet_metas_for_kw
         utils.save_cache_file(keyword, total_tweet_results)
 
         for t in total_tweet_results:
