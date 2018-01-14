@@ -18,7 +18,7 @@ ACCESS_SECRET_KAI = "nfvnqZdo2twVd9dHDnsz2ZibybOWY87CE2esCbdY14pb6"
 BATCHES_TWEETS = 2 # How many times to fetch tweets per keyword
 TOP_N = 10 # How many assicociated words to return
 COUNT = 100 # How many tweets to retrieve per query (MAX is 100)
-SMALL_COUNT = 10 # How many tweets to retrieve per query (MAX is 100)
+SMALL_COUNT = 100 # How many tweets to retrieve per query (MAX is 100)
 
 auth_aidan = twitter.OAuth(ACCESS_TOKEN_AIDAN, ACCESS_SECRET_AIDAN, CONSUMER_KEY_AIDAN, CONSUMER_SECRET_AIDAN)
 auth_kai = twitter.OAuth(ACCESS_TOKEN_KAI, ACCESS_SECRET_KAI, CONSUMER_KEY_KAI, CONSUMER_SECRET_KAI)
@@ -198,6 +198,8 @@ def analyze_many(request):
         # if entity not in weights:
         #     weights[entity], agg_sent[entity] = 0, 0
         # weights[entity] += 1
+        if entity not in agg_sent:
+            agg_sent[entity] = 0
         agg_sent[entity] += meta['sentiment']
 
     max_weight = max([v for v in weights.values()])

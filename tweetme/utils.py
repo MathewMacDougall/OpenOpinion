@@ -55,10 +55,10 @@ def analyze_tweets(tweets, just_sentiment=False):
             entities = [word for word in tokens if word not in aggregate]
             entities.extend(list(compounds))
             tweet_metas.append({'sentiment': sentiment, 'entities': entities, 'id': tweets[i]['id'],
-                                'timestamp': tweets[i]['timestamp']})
+                                'timestamp': tweets[i]['timestamp'], 'created_at': tweets[i]['created_at']})
         else:
             tweet_metas.append({'sentiment': sentiment, 'id': tweets[i]['id'],
-                                'timestamp': tweets[i]['timestamp']})
+                                'timestamp': tweets[i]['timestamp'], 'created_at': tweets[i]['created_at']})
 
 
     return tweet_metas
