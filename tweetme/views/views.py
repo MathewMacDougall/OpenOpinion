@@ -4,6 +4,8 @@ import twitter
 import random
 import os
 
+import re
+
 CONSUMER_KEY = "ET6mcjXi8L6RxK5kH2e4zDBCa"
 CONSUMER_SECRET = "AhlnBaCBtpxmoYbH4aefITQHYDiCP8Plo0ejqOVrc4NYQiqLDk"
 ACCESS_TOKEN = "859835152507125761-M2zMka0P1zYdUbWZTdum3vnMI0IPnzO"
@@ -15,6 +17,8 @@ COUNT = 20
 
 auth = twitter.OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 tweety = twitter.Twitter(auth=auth)
+
+SKIP_ENTITIES = ['rt']
 
 def analyze(request):
     keyword = request.GET.get('keyword')
@@ -38,6 +42,9 @@ def analyze(request):
         for s in res['statuses']:
             # Remove emojies from the text
             text = ''.join([x for x in s['text'] if ord(x) < 256])
+            text = re.sub(r'RT ', '', text)
+            # text = re.sub(r'RT @?(\w){1,15}:', '', text)
+            text = re.sub(r'(?:(?:https?|ftp):\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,}))\.?)(?::\d{2,5})?(?:[/?#]\S*)?', '', text)
             tweets.append({
                 'text': text, # The body of the tweet
                 'retweet_count': s['retweet_count'], # Retweet count
@@ -68,7 +75,7 @@ def analyze(request):
 
     for meta in total_tweet_results:
         for entity in meta['entities']:
-            if entity == 'RT': continue
+            if entity.lower() in SKIP_ENTITIES: continue
             if entity not in weights:
                 weights[entity], agg_sent[entity] = 0, 0
             weights[entity] += 1
