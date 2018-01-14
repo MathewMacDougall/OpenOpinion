@@ -57,28 +57,26 @@ def analyze(request):
     return http.JsonResponse(result, safe=False)
 
 def fakeanalyze(request):
-    q = request.GET['user_query']
-    print(q)
     fake = [
         {"entity": "Trump",
-         "weight": "0.7",
-         "sentiment": "-0.7"
+         "weight": random.random(),
+         "sentiment": random.random() * 2 - 1
         },
         {"entity": "cats",
-         "weight": "0.3",
-         "sentiment": "0.5"
+         "weight": random.random(),
+         "sentiment": random.random() * 2 - 1
         },
         {"entity": "gucci",
-         "weight": "0.05",
-         "sentiment": "0.1"
+         "weight": random.random(),
+         "sentiment": random.random() * 2 - 1
         },
         {"entity": "Justin Trudeau",
-         "weight": "0.97",
-         "sentiment": "0.99"
+         "weight": random.random(),
+         "sentiment": random.random() * 2 - 1
         },
         {"entity": "NWHacks",
-         "weight": "0.5",
-         "sentiment": "0.6"
+         "weight": random.random(),
+         "sentiment": random.random() * 2 - 1
         }
         ]
 
@@ -91,14 +89,3 @@ def get_sentiment_score(tweets):
     scores = [get_sentiment(tweet.text) for tweet in tweets]
     mean_score = np.mean(scores)
     return mean_score
-
-# Returns the weight for the keyword for a list of tweets
-def get_weight(tweets):
-   return 0.5 
-
-# Normalizes the values in an array
-def normalize(v):
-    norm = np.linalg.norm(v)
-    if norm == 0: 
-       return v
-    return v / norm

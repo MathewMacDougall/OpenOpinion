@@ -23,3 +23,18 @@ def analyze_tweet(tweets):
         sentenceSentimentScore.append(int(sentence['sentimentValue']) * (sentence['sentiment'] == 'Negative' and -1 or 1))
 
     return sentenceSentimentScore
+
+def get_top_n_entities(analyzed_tweets, n):
+
+
+# Returns the weight for the keyword for a list of tweets
+def get_weight(tweets):
+   return 0.5 
+
+# Normalizes the values in an array
+def normalize(v):
+    norm = np.linalg.norm(v)
+    if norm == 0: 
+       return v
+    return v / norm
+
