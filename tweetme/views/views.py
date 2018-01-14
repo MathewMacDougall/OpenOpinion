@@ -12,7 +12,8 @@ auth = twitter.OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 tweety = twitter.Twitter(auth=auth)
 
 def analyze(request):
-    keywords = request.GET['keyword']
+    keywords = request.GET.getlist('keyword')
+    type = request.GET['type']
     print("keywords are {} and type is {}".format(keywords, type))
 
     # The array where we store the results for each keyword
