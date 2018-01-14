@@ -17,11 +17,12 @@ from django.conf import settings
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
-from tweetme.views.views import analyze, fakeanalyze
+from tweetme.views.views import analyze, fakeanalyze, analyze_many
 
 urlpatterns = [
     url(r"^$", TemplateView.as_view(template_name='index.html')),
     url(r"^analyze$", analyze),
+    url(r"^analyze_many$", analyze_many),
     url(r"^fakeanalyze$", fakeanalyze)
 
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

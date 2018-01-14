@@ -7,7 +7,7 @@ NLP_SERVICE_URL = 'http://localhost:9000/?properties={"annotators":"tokenize,ssp
 CACHE_PATH = "cache/"
 CACHE_TIME = 60 * 60 # 1 hour
 
-def analyze_tweet(tweets, just_sentiment=False):
+def analyze_tweets(tweets, just_sentiment=False):
     tweets_text = [t['text'] for t in tweets]
     tweets_text = [t.replace('.', ',') for t in tweets_text]
     tweet_block = '. '.join(tweets_text) + '.'
@@ -37,7 +37,7 @@ def analyze_tweet(tweets, just_sentiment=False):
             for structure in sentence['openie']:
                 compounds.add(structure['subject'])
                 compounds.add(structure['object'])
-                aggregate = ' '.join(compounds) # TODO: I've commited a grave sin.
+            aggregate = ' '.join(compounds) # TODO: I've commited a grave sin.
 
             entities = [word for word in tokens if word not in aggregate]
             entities.extend(list(compounds))
