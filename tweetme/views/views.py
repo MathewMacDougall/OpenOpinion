@@ -99,16 +99,17 @@ def analyze(request):
             if entity not in weights:
                 weights[entity], agg_sent[entity] = 0, 0
             weights[entity] += 1
-            agg_sent[entity] += meta['sentiment']
+            agg_sent[entity] += meta['sentiment']/5.0
+
+
+    avg_sent = {e:agg_sent[e] / weights[e] for e in agg_sent}
+
 
     max_weight = max([v for v in weights.values()])
-    max_sent = max([abs(v) for v in agg_sent.values()])
     for k in weights:
         weights[k] /= max_weight
-    for k in agg_sent:
-        agg_sent[k] = utils.translate(agg_sent[k], -5, 5, -1, 1)
 
-    results = [{'entity': e, 'weight': weights[e], 'sentiment': agg_sent[e]} for e in weights]
+    results = [{'entity': e, 'weight': weights[e], 'sentiment': avg_sent[e]} for e in weights]
     results.sort(key=lambda r: r['weight'], reverse=True)
     return http.JsonResponse(results[:TOP_N], safe=False)
 
