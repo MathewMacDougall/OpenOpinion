@@ -52,20 +52,21 @@ def analyze(request):
     print(f'Took {t1 - t0}s to fetch {BATCHES_TWEETS} batches of tweets')
 
     # Load any cached data for this query
-    cache_metas = utils.get_cache_filename(keyword)
+    cache_metas = utils.load_cache_file(keyword)
+    cache_tweet_ids = {t['id'] for t in cache_metas}
 
     # Remove any scraped tweets that are already in the cache
-    tweets = [t for t in tweets if not cache_metas.has_key(tweets['id]'])]
+    tweets = [t for t in tweets if t['id'] not in cache_tweet_ids]
 
-    tweet_metas = utils.analyze_tweets([t['text'] for t in tweets])
+    tweet_metas = utils.analyze_tweets(tweets)
     print(f'Took {time.time() - t1}s to analyze tweets')
 
-    # Combine cached results and new results
-    tweet_results = {}
-    tweet_results.update(cache_metas)
-    tweet_results.update(tweet_metas)
+    # Combine cached results and new results. Store this new data in the cache again
+    total_tweet_results = cache_metas + tweet_metas
+    utils.save_cache_file(keyword, total_tweet_results)
+    #return http.JsonResponse(res, safe=False)
 
-    for meta in tweet_results:
+    for meta in total_tweet_results:
         for entity in meta['entities']:
             if entity == 'RT': continue
             if entity not in weights:
@@ -82,10 +83,6 @@ def analyze(request):
 
     results = [{'entity': e, 'weight': weights[e], 'sentiment': agg_sent[e]} for e in weights]
     results.sort(key=lambda r: r['weight'], reverse=True)
-
-    # Save results in cache
-    utils.save_cache_file(keyword, results)
-
     return http.JsonResponse(results[:TOP_N], safe=False)
 
 def fakeanalyze(request):
