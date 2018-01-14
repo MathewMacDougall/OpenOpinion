@@ -18,7 +18,7 @@ ACCESS_SECRET_KAI = "nfvnqZdo2twVd9dHDnsz2ZibybOWY87CE2esCbdY14pb6"
 BATCHES_TWEETS = 2 # How many times to fetch tweets per keyword
 TOP_N = 10 # How many assicociated words to return
 COUNT = 100 # How many tweets to retrieve per query (MAX is 100)
-SMALL_COUNT = 100 # How many tweets to retrieve per query (MAX is 100)
+SMALL_COUNT = 25 # How many tweets to retrieve per query (MAX is 100)
 
 auth_aidan = twitter.OAuth(ACCESS_TOKEN_AIDAN, ACCESS_SECRET_AIDAN, CONSUMER_KEY_AIDAN, CONSUMER_SECRET_AIDAN)
 auth_kai = twitter.OAuth(ACCESS_TOKEN_KAI, ACCESS_SECRET_KAI, CONSUMER_KEY_KAI, CONSUMER_SECRET_KAI)
@@ -132,6 +132,7 @@ def analyze_many(request):
 
     # The array where we store the results for each keyword
     agg_sent = {}
+    ent_counts = {}
     weights = {}
     tweet_metas = []
 
@@ -188,7 +189,7 @@ def analyze_many(request):
         # Calculate weight for this keyword. Based off of tweets per time
         tweet_times = [t['created_at'] for t in total_tweet_results]
         tweet_times = [datetime.strptime(s, '%a %b %d %H:%M:%S %z %Y') for s in tweet_times]
-        tweet_times = [dt.replace(tzinfo=timezone.utc).timestamp() for dt in tweet_times]
+        tweet_times = [dt.timestamp() for dt in tweet_times]
         weights[keyword] = len(total_tweet_results) / ((max(tweet_times) - min(tweet_times)) or 1)
 
         tweet_metas += total_tweet_results
@@ -201,16 +202,17 @@ def analyze_many(request):
         # weights[entity] += 1
         if entity not in agg_sent:
             agg_sent[entity] = 0
-        agg_sent[entity] += meta['sentiment']
+            ent_counts[entity] = 0
+        ent_counts[entity] += 1
+        agg_sent[entity] += meta['sentiment'] / 5.0
+
+    avg_sent = {e:agg_sent[e]/ent_counts[e] for e in agg_sent}
 
     max_weight = max([v for v in weights.values()])
-    max_sent = max([abs(v) for v in agg_sent.values()])
     for k in weights:
         weights[k] /= max_weight
-    for k in agg_sent:
-        agg_sent[k] /= max_sent
 
-    results = [{'entity': e, 'weight': weights[e], 'sentiment': agg_sent[e]} for e in weights]
+    results = [{'entity': e, 'weight': weights[e], 'sentiment': avg_sent[e]} for e in weights]
     results.sort(key=lambda r: r['weight'], reverse=True)
     return http.JsonResponse(results, safe=False)
 
