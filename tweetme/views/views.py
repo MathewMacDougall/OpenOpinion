@@ -1,4 +1,5 @@
 from django import http
+from tweetme import utils
 import twitter
 import numpy as np
 import random
@@ -8,25 +9,31 @@ CONSUMER_SECRET = "AhlnBaCBtpxmoYbH4aefITQHYDiCP8Plo0ejqOVrc4NYQiqLDk"
 ACCESS_TOKEN = "859835152507125761-M2zMka0P1zYdUbWZTdum3vnMI0IPnzO"
 ACCESS_SECRET = "2SyT2qaNGkYWZgXERiBX01lHZU3VnUgVSZWFRwVJ5p1zM"
 
+BATCHES_TWEETS = 2
+TOP_N = 10
+
 auth = twitter.OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 tweety = twitter.Twitter(auth=auth)
 
 def analyze(request):
-    keywords = request.GET.getlist('keyword')
+    keyword = request.GET.get('keyword')
     type = request.GET['type']
-    print("keywords are {} and type is {}".format(keywords, type))
+    print("keywords are {} and type is {}".format(keyword, type))
 
     # The array where we store the results for each keyword
-    result = []
-    sentiment_scores = []
-    weights = []
+    agg_sent = {}
+    weights = {}
+    tweets = []
 
-    for keyword in keywords: 
+    import time
+    t0 = time.time()
+    max_id = None
+    for i in range(BATCHES_TWEETS):
         # Get the tweet data for each keyword
-        res = tweety.search.tweets(q=keyword,lang='en',result_type='recent',count=100)
+        res = tweety.search.tweets(q=keyword,lang='en',result_type='recent',count=100, max_id=max_id)
 
         # Extract the important info from the tweets
-        tweets = []
+
         for s in res['statuses']:
             # Remove emojies from the text
             text = ''.join([x for x in s['text'] if ord(x) < 256])
@@ -36,25 +43,31 @@ def analyze(request):
                 'user_followers': s['user']['followers_count'],
                 'created_at': s['created_at']
             })
+        max_id = min([s['id'] for s in res['statuses']])
+    t1 = time.time()
+    print(f'Took {t1 - t0}s to fetch {BATCHES_TWEETS} batches of tweets')
 
-        # Get the sentiment score for this keyword
-        sentiment_scores.append(random.random())#get_sentiment_score(tweets))
 
-        # Get the weight for this keyword
-        weights.append(get_weight(tweets))
+    tweet_metas = utils.analyze_tweets([t['text'] for t in tweets])
+    print(f'Took {time.time() - t1}s to analyze tweets')
+    for meta in tweet_metas:
+        for entity in meta['entities']:
+            if entity == 'RT': continue
+            if entity not in weights:
+                weights[entity], agg_sent[entity] = 0, 0
+            weights[entity] += 1
+            agg_sent[entity] += meta['sentiment']
 
-    # Normalize the results before saving to the results
-    norm_sentiment = normalize(sentiment_scores)
-    norm_weights = normalize(weights)
+    max_weight = max([v for v in weights.values()])
+    max_sent = max([abs(v) for v in agg_sent.values()])
+    for k in weights:
+        weights[k] /= max_weight
+    for k in agg_sent:
+        agg_sent[k] /= max_sent
 
-    for i in range(len(keywords)):
-        result.append({
-            "entity": keywords[i],
-            "weight": norm_weights[i],
-            "sentiment": norm_sentiment[i]
-            })
-
-    return http.JsonResponse(result, safe=False)
+    results = [{'entity': e, 'weight': weights[e], 'sentiment': agg_sent[e]} for e in weights]
+    results.sort(key=lambda r: r['weight'], reverse=True)
+    return http.JsonResponse(results[:TOP_N], safe=False)
 
 def fakeanalyze(request):
     fake = [
@@ -83,9 +96,9 @@ def fakeanalyze(request):
     return http.JsonResponse(fake, safe=False)
 
 # Returns the average sentiment for a list of tweets
-def get_sentiment_score(tweets): 
-    # Get the sentiment score for each tweet
-    # Use Kai's function call here
-    scores = [get_sentiment(tweet.text) for tweet in tweets]
-    mean_score = np.mean(scores)
-    return mean_score
+# def get_sentiment_score(tweets):
+#     # Get the sentiment score for each tweet
+#     # Use Kai's function call here
+#     scores = [get_sentiment(tweet.text) for tweet in tweets]
+#     mean_score = np.mean(scores)
+#     return mean_score

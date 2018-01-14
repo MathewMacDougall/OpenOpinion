@@ -1,11 +1,18 @@
 import requests
 
-NLP_SERVICE_URL = 'localhost:9000/?properties={"annotators":"tokenize,ssplit,parse,pos,sentiment,","outputFormat":"json"}'
+NLP_SERVICE_URL = 'http://localhost:9000/?properties={"annotators":"tokenize,ssplit,pos,lemma,ner,parse,dcoref,sentiment,depparse,natlog,openie","outputFormat":"json"}'
 
-def analyze_tweet(tweets):
+def analyze_tweets(tweets):
     tweets = [t.replace('\.', ',') for t in tweets]
     tweet_block = '. '.join(tweets) + '.'
-    res = requests.post(NLP_SERVICE_URL, data=tweet_block).json()
+    res = requests.post(NLP_SERVICE_URL, data=tweet_block)
+    try:
+        raw = res.text
+        print(f'{raw[:20]}...{raw[-20:]}')
+        res = res.json()
+    except BaseException as e:
+        print(e)
+        print(res.text)
     data = res['sentences']
 
     tweet_metas = []
