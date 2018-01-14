@@ -15,21 +15,9 @@ def analyze(request):
 
     res = tweety.search.tweets(q=q)
 
-    # Do crazy NLP stuff
-    entities = [{"entity": "Donald Trump", "mentions": 1207, "sentiment_sum": -23321.3},
-                {"entity": "Barack Obama", "mentions": 455, "sentiment_sum": 4211.3},
-                {"entity": "Hilary Clinton", "mentions": 551, "sentiment_sum": -100},
-                {"entity": q, "mentions": 12007, "sentiment_sum": 99999}]
-
-    entities = [t.get('text') for t in res['statuses']]
-    import pprint
-    pprint.pprint(entities)
-    pprint.pprint(res['statuses'][0])
-
-
     entities = []
     for s in res['statuses']:
-        text = s['text'].replace('\\u[0-9a-f]{4}', '')
+        text = ''.join([x for x in s['text'] if ord(x) < 256])
         entities.append({
             'text': text,
             'retweet_count': s['retweet_count'],
