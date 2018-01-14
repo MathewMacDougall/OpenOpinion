@@ -2,8 +2,6 @@ from django import http
 from tweetme import utils
 import twitter
 import random
-import os
-
 import re
 
 CONSUMER_KEY = "ET6mcjXi8L6RxK5kH2e4zDBCa"
@@ -11,9 +9,9 @@ CONSUMER_SECRET = "AhlnBaCBtpxmoYbH4aefITQHYDiCP8Plo0ejqOVrc4NYQiqLDk"
 ACCESS_TOKEN = "859835152507125761-M2zMka0P1zYdUbWZTdum3vnMI0IPnzO"
 ACCESS_SECRET = "2SyT2qaNGkYWZgXERiBX01lHZU3VnUgVSZWFRwVJ5p1zM"
 
-BATCHES_TWEETS = 1
-TOP_N = 10
-COUNT = 20
+BATCHES_TWEETS = 1 # How many times to fetch tweets per keyword
+TOP_N = 10 # How many assicociated words to return
+COUNT = 50 # How many tweets to retrieve per query (MAX is 100)
 
 auth = twitter.OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 tweety = twitter.Twitter(auth=auth)
@@ -21,6 +19,7 @@ tweety = twitter.Twitter(auth=auth)
 SKIP_ENTITIES = ['rt']
 
 def analyze(request):
+    print("\n\n")
     keyword = request.GET.get('keyword')
     type = request.GET['type']
     print("keywords are {} and type is {}".format(keyword, type))
@@ -56,7 +55,7 @@ def analyze(request):
         max_id = min([s['id'] for s in res['statuses']])
 
     t1 = time.time()
-    print(f'Took {t1 - t0}s to fetch {BATCHES_TWEETS} batches of tweets')
+    print(f'Took {t1 - t0}s to fetch {BATCHES_TWEETS*COUNT} tweets')
 
     # Load any cached data for this query
     cache_metas = utils.load_cache_file(keyword)
@@ -65,13 +64,15 @@ def analyze(request):
     # Remove any scraped tweets that are already in the cache
     tweets = [t for t in tweets if t['id'] not in cache_tweet_ids]
 
+    t2 = time.time()
     tweet_metas = utils.analyze_tweets(tweets)
-    print(f'Took {time.time() - t1}s to analyze tweets')
+    t3 = time.time()
+    print(f'Loaded {len(cache_metas)} results from cache')
+    print(f'Took {t3 - t2}s to analyze {len(tweet_metas)} new tweets')
 
     # Combine cached results and new results. Store this new data in the cache again
     total_tweet_results = cache_metas + tweet_metas
     utils.save_cache_file(keyword, total_tweet_results)
-    #return http.JsonResponse(res, safe=False)
 
     for meta in total_tweet_results:
         for entity in meta['entities']:

@@ -8,8 +8,6 @@ CACHE_PATH = "cache/"
 CACHE_TIME = 60 * 60 # 1 hour
 
 def analyze_tweets(tweets):
-    if not tweets:
-        return []
     tweets_text = [t['text'] for t in tweets]
     tweets_text = [t.replace('.', ',') for t in tweets_text]
     tweet_block = '. '.join(tweets_text) + '.'
