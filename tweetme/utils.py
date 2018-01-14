@@ -1,26 +1,39 @@
+import itertools
 import requests
 import os
 import json
 import time
+import threading
 
 NLP_SERVICE_URL = 'http://localhost:9000/?properties={"annotators":"tokenize,ssplit,pos,lemma,ner,parse,dcoref,sentiment,depparse,natlog,openie","outputFormat":"json"}'
 CACHE_PATH = "cache/"
 CACHE_TIME = 60 * 60 # 1 hour
+NUM_THREADS = 10
+
+def process_block(tweet_block, results, i):
+    res = requests.post(NLP_SERVICE_URL, data=tweet_block)
+    res = res.json()
+    results[i] = res['sentences']
 
 def analyze_tweets(tweets, just_sentiment=False):
     tweets_text = [t['text'] for t in tweets]
     tweets_text = [t.replace('.', ',') for t in tweets_text]
-    tweet_block = '. '.join(tweets_text) + '.'
-    res = requests.post(NLP_SERVICE_URL, data=tweet_block)
-    try:
-        raw = res.text
-        print(f'{raw[:20]}...{raw[-20:]}')
-        res = res.json()
-    except BaseException as e:
-        print(e)
-        print(res.text)
-    data = res['sentences']
+    chunk_size = len(tweets_text) // NUM_THREADS
+    threads = []
+    results = [] * NUM_THREADS
+    for i in range(NUM_THREADS):
+        tweet_chunk = tweets_text[i*chunk_size:(i+1)*chunk_size]
+        if i + 1 == NUM_THREADS:
+            tweet_chunk += tweets_text[(i+1)*chunk_size:(i+2)*chunk_size]
+        tweet_block = '. '.join(tweet_chunk) + '.'
+        thread = threading.Thread(target=process_block, args=(tweet_block, results, i))
+        thread.start()
+        threads.append(thread)
 
+    for thread in threads:
+        thread.join()
+
+    data = list(itertools.chain.from_iterable(results))
     tweet_metas = []
     print("len data is {}, len tweets is {}".format(len(data), len(tweets)))
 
