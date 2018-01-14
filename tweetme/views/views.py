@@ -24,7 +24,6 @@ auth_aidan = twitter.OAuth(ACCESS_TOKEN_AIDAN, ACCESS_SECRET_AIDAN, CONSUMER_KEY
 auth_kai = twitter.OAuth(ACCESS_TOKEN_KAI, ACCESS_SECRET_KAI, CONSUMER_KEY_KAI, CONSUMER_SECRET_KAI)
 tweety_aidan = twitter.Twitter(auth=auth_aidan)
 tweety_kai = twitter.Twitter(auth=auth_kai)
-global api_counter
 api_counter = 0
 
 SKIP_ENTITIES = ['rt']
@@ -35,6 +34,7 @@ def analyze(request):
     type = request.GET['type']
     print("keywords are {} and type is {}".format(keyword, type))
 
+    global api_counter
     if api_counter % 2 is 0:
         tweety = tweety_aidan
         #api_aidan = not api_aidan
@@ -123,6 +123,7 @@ def analyze_many(request):
     type = request.GET['type']
     print("keywords are {} and type is {}".format(keywords, type))
 
+    global api_counter
     if api_counter % 2 is 0:
         tweety = tweety_aidan
     else:
