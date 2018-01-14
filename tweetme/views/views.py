@@ -88,7 +88,7 @@ def analyze(request):
     for k in weights:
         weights[k] /= max_weight
     for k in agg_sent:
-        agg_sent[k] /= max_sent
+        agg_sent[k] = utils.translate(agg_sent[k], -5, 5, -1, 1)
 
     results = [{'entity': e, 'weight': weights[e], 'sentiment': agg_sent[e]} for e in weights]
     results.sort(key=lambda r: r['weight'], reverse=True)
