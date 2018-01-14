@@ -1,0 +1,8 @@
+<h3>Keywords</h3>
+<div class="keywords" *ngFor="let keyword of keywords">
+  <div class="item">
+    {{keyword}}
+    <i class="fa fa-remove" (click)="onClick(keyword)"></i>
+  </div>
+</div>
+<input #box type="text" placeholder="Type new word and press enter" [(ngModel)]="addKeywordValue" (keyup.enter)="onEnter(box.value)"/>

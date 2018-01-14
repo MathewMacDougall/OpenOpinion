@@ -1,0 +1,30 @@
+.keywords {
+  width: 100%;
+
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.item {
+  display: flex;
+  font-size: 16px;
+}
+
+.item i {
+  margin-left: auto;
+  cursor: pointer;
+}
+
+input {
+  width: 100%;
+
+  color: black;
+
+  outline: none;
+
+  padding: 6px 0;
+  margin-top: 8px;
+
+  font-size: 16px;
+  border: none;
+}

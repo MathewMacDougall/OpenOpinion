@@ -1,0 +1,12 @@
+<div id="sidebar-wrapper">
+  <app-word-select></app-word-select>
+</div>
+<app-graph [data]='data'></app-graph>
+<div id="top">
+  <app-search>
+  </app-search>
+  <div class="spinner" *ngIf="isLoading">
+    <div class="double-bounce1"></div>
+    <div class="double-bounce2"></div>
+  </div>
+</div>
