@@ -13,7 +13,7 @@ ACCESS_SECRET = "2SyT2qaNGkYWZgXERiBX01lHZU3VnUgVSZWFRwVJ5p1zM"
 BATCHES_TWEETS = 2 # How many times to fetch tweets per keyword
 TOP_N = 10 # How many assicociated words to return
 COUNT = 100 # How many tweets to retrieve per query (MAX is 100)
-SMALL_COUNT = 10 # How many tweets to retrieve per query (MAX is 100)
+SMALL_COUNT = 100 # How many tweets to retrieve per query (MAX is 100)
 
 auth = twitter.OAuth(ACCESS_TOKEN, ACCESS_SECRET, CONSUMER_KEY, CONSUMER_SECRET)
 tweety = twitter.Twitter(auth=auth)
