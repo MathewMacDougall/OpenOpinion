@@ -8,18 +8,23 @@ def analyze_tweet(tweets):
     res = requests.post(NLP_SERVICE_URL, data=tweet_block).json()
     data = res['sentences']
 
-    nouns = []
-    sentenceSentimentScore = []
+    tweet_metas = []
 
     for sentence in data:
-        words = str(sentence['parse']).split()
-        if '(NNP' in words:
-            noun = words[words.index('(NNP') + 1:[words.index(x) for x in words if x.endswith('))')][0] + 1]
-            if '(NNP' in noun:
-                noun.remove('(NNP')
-            noun = ' '.join(noun).replace(')', '')
-            nouns.append(noun)
+        tokens = filter(lambda word: str(word['pos']).startswith('NN'), sentence['tokens'])
+        tokens = [token['word'] for token in tokens]
 
-        sentenceSentimentScore.append(int(sentence['sentimentValue']) * (sentence['sentiment'] == 'Negative' and -1 or 1))
+        compounds = set()
+        for structure in sentence['openie']:
+            compounds.add(structure['subject'])
+            compounds.add(structure['object'])
+        aggregate = ' '.join(compounds) # TODO: I've commited a grave sin.
 
-    return sentenceSentimentScore
+        entities = [word for word in tokens if word not in aggregate]
+        entities.extend(list(compounds))
+
+        sent = int(sentence['sentimentValue']) * (sentence['sentiment'] == 'Negative' and -1 or 1)
+
+        tweet_metas.append({'sentiment': sent, 'entities': entities})
+
+    return tweet_metas
