@@ -3,6 +3,7 @@ from tweetme import utils
 import twitter
 import random
 import re
+from datetime import timezone, datetime
 
 CONSUMER_KEY = "ET6mcjXi8L6RxK5kH2e4zDBCa"
 CONSUMER_SECRET = "AhlnBaCBtpxmoYbH4aefITQHYDiCP8Plo0ejqOVrc4NYQiqLDk"
@@ -94,6 +95,11 @@ def analyze(request):
     results.sort(key=lambda r: r['weight'], reverse=True)
     return http.JsonResponse(results[:TOP_N], safe=False)
 
+
+
+#============================================================================================#
+
+
 def analyze_many(request):
     print("\n\n")
     keywords = request.GET.get('keywords').split(',')
@@ -155,14 +161,20 @@ def analyze_many(request):
         for t in total_tweet_results:
             t['entity'] = keyword
 
+        # Calculate weight for this keyword. Based off of tweets per time
+        tweet_times = [t['created_at'] for t in total_tweet_results]
+        tweet_times = [datetime.strptime(s, '%a %b %d %H:%M:%S %z %Y') for s in tweet_times]
+        tweet_times = [dt.replace(tzinfo=timezone.utc).timestamp() for dt in tweet_times]
+        weights[keyword] = len(total_tweet_results) / ((max(tweet_times) - min(tweet_times)) or 1)
+
         tweet_metas += total_tweet_results
 
     for meta in tweet_metas:
         entity = meta['entity']
         if entity.lower() in SKIP_ENTITIES: continue
-        if entity not in weights:
-            weights[entity], agg_sent[entity] = 0, 0
-        weights[entity] += 1
+        # if entity not in weights:
+        #     weights[entity], agg_sent[entity] = 0, 0
+        # weights[entity] += 1
         agg_sent[entity] += meta['sentiment']
 
     max_weight = max([v for v in weights.values()])
