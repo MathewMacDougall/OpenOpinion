@@ -3,6 +3,10 @@
 
 Open Opinion was a project for NWHacks 2018. The idea was to show the general sentiment of recent Tweets about various user-selected topics, as well as the relative popularity of each topic.
 
+[[https://github.com/MathewMacDougall/OpenOpinion/blob/master/images/open_opinion_2.png]]
+
+[[https://github.com/MathewMacDougall/OpenOpinion/blob/master/images/open_opinion_3.png]]
+
 ### How it works
 The user is able to enter keywords, which will cause a new "bubble" to appear for that keyword. The bubbles are sized based on recent tweet activity of each keyword (with larger bubbles corresponding to relatively more activity), and are colored based on the average sentiments of the tweets corresponding to that keyword. In our examples, blue is positive, red is negative.
 
