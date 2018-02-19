@@ -3,9 +3,9 @@
 
 Open Opinion was a project for NWHacks 2018. The idea was to show the general sentiment of recent Tweets about various user-selected topics, as well as the relative popularity of each topic.
 
-[[https://github.com/MathewMacDougall/OpenOpinion/blob/master/images/open_opinion_2.png]]
+![image 1](https://github.com/MathewMacDougall/OpenOpinion/blob/master/images/open_opinion_2.png)
 
-[[https://github.com/MathewMacDougall/OpenOpinion/blob/master/images/open_opinion_3.png]]
+![image 2](https://github.com/MathewMacDougall/OpenOpinion/blob/master/images/open_opinion_3.png)
 
 ### How it works
 The user is able to enter keywords, which will cause a new "bubble" to appear for that keyword. The bubbles are sized based on recent tweet activity of each keyword (with larger bubbles corresponding to relatively more activity), and are colored based on the average sentiments of the tweets corresponding to that keyword. In our examples, blue is positive, red is negative.
@@ -20,5 +20,3 @@ Because the CoreNLP library take a relatively long time to run, we cache the res
 1. Download Stanford's CoreNLP library from [here](nfvnqZdo2twVd9dHDnsz2ZibybOWY87CE2esCbdY14pb6). Extract and run it with `java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer - -port 9000 -timeout 15000`
 2. Install the Python requirements and run the app with `python manage.py runserver 8000` or something similar
 3. Load the static webpage, and enjoy!
-
-
